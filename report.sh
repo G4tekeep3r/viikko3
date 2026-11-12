@@ -4,7 +4,7 @@ OUTPUT_DIR="/var/www/html/viikko3"
 GITHUB_URL="https://github.com/G4tekeep3r/viikko3.git"
 TEMP_FILE="$(mktemp "$OUTPUT_DIR/.index.XXXXXX")"
 
-# Funktio: palauttaa OK tai WARNING prosentin perusteella
+# Function: returns either OK or WARNING based on percentage
 get_disk_status() {
     local usage="$1"
     if [ "$usage" -ge 80 ]; then
@@ -91,7 +91,12 @@ cat > "$TEMP_FILE" <<EOF
     <header>
         <h1>Server Status Report</h1>
         <p>Week 3: Linux command line and Bash scripting</p>
-        <p>TODO: Add your own introduction.</p>
+        <p>
+           This page automatically updates server status report for my Linux server in CSC cPouta.
+           A bash script collects current date and time, uptime, root filesystem disk usage and RAM information,
+           and generates this HTML page. The report also shows a disk space status that changes
+           from OK to WARNING when disk usage reaches 80%.
+        </p>
     </header>
 
     <section>
@@ -184,8 +189,20 @@ cat > "$TEMP_FILE" <<EOF
             Nginx serves this file at /viikko3/.
         </p>
         <p>
-            TODO: Explain the disk space function and one example
-            of piping from your own script.
+            The disk space function reads the current disk usage percentage of the root filesystem
+            and returns a status based on it. An if statement compares the value to a threshold:
+            usage below 80% gives "OK", and 80% or more gives "WARNING". The result is then stored
+            in a variable and inserted into the HTML report.
+        </p>
+        <p>
+            Example of piping from my script:
+        </p>
+        <p>
+            <code>df -P / | awk 'NR==2 {print &#36;5}' | tr -d '%'</code>
+        </p>
+        <p>
+            <code>df</code> prints the disk usage table, <code>awk</code> picks the usage column from the second line,
+            and <code>tr</code> removes the % sign so the value can be compared as a number.
         </p>
     </section>
 
@@ -203,16 +220,23 @@ cat > "$TEMP_FILE" <<EOF
 
         <h3>Syntax check and manual execution</h3>
         <p>
-            TODO: Describe the results of running
-            <code>bash -n report.sh</code>
-            and executing the script manually.
+            I ran <code>bash -n report.sh</code> and it produced no output, which means there are
+            no syntax errors. I then ran the script manually with <code>./report.sh</code>.
+            It completed without errors and created /var/www/html/viikko3/index.html. I opened
+            viikko3 in the browser and the report showed the current time, uptime, disk usage and memory.
         </p>
 
         <h3>Disk space status tests</h3>
         <p>
-            TODO: Test the status logic using temporary input values.
-            Record your actual results below and restore real disk
-            usage afterwards.
+            I tested the status logic by giving temporary input values to the script as a parameter.
+        </p>
+        <ul>
+            <li><code>./report.sh 50</code></li>
+            <li><code>./report.sh 80</code></li>
+            <li><code>./report.sh 90</code></li>
+        </ul>
+        <p>
+            After the tests I ran <code>./report.sh</code> without a parameter to restore real disk usage percentage.
         </p>
 
         <div class="table-container">
@@ -228,17 +252,17 @@ cat > "$TEMP_FILE" <<EOF
                     <tr>
                         <td>50%</td>
                         <td>OK</td>
-                        <td>TODO</td>
+                        <td>OK</td>
                     </tr>
                     <tr>
                         <td>80%</td>
                         <td>WARNING</td>
-                        <td>TODO</td>
+                        <td>WARNING</td>
                     </tr>
                     <tr>
                         <td>90%</td>
                         <td>WARNING</td>
-                        <td>TODO</td>
+                        <td>WARNING</td>
                     </tr>
                 </tbody>
             </table>
