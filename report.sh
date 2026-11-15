@@ -209,9 +209,20 @@ cat > "$TEMP_FILE" <<EOF
     <section>
         <h2>Scheduling</h2>
         <p>
-            TODO: State whether you used cron or a systemd timer.
-            Explain the schedule and how you ensured that it
-            continues after a reboot.
+            I used cron to run the script automatically. The schedule is defined in my user's crontab
+            with the following line:
+        </p>
+        <p>
+            <code>* * * * * /home/ubuntu/viikko3/report.sh</code>
+        </p>
+        <p>
+            The five asterisks mean that the script runs every minute of every
+            hour, day, month and weekday. For cron finding the script, the full path is used.
+        </p>
+        <p>
+            Cron service is enabled in systemd, so it starts automatically when
+            the virtual machine reboots. I checked this with <code>systemctl is-enabled cron</code>
+            and confirmed with the reboot test that the report continued to update.
         </p>
     </section>
 
@@ -231,9 +242,9 @@ cat > "$TEMP_FILE" <<EOF
             I tested the status logic by giving temporary input values to the script as a parameter.
         </p>
         <ul>
-            <li><code>./report.sh 50</code></li>
-            <li><code>./report.sh 80</code></li>
-            <li><code>./report.sh 90</code></li>
+            <li><code>./report.sh 50</code> : 50% disk usage</li>
+            <li><code>./report.sh 80</code> : 80% disk usage</li>
+            <li><code>./report.sh 90</code> : 90% disk usage</li>
         </ul>
         <p>
             After the tests I ran <code>./report.sh</code> without a parameter to restore real disk usage percentage.
@@ -270,21 +281,47 @@ cat > "$TEMP_FILE" <<EOF
 
         <h3>Automatic updates</h3>
         <p>
-            TODO: Record the generation times of at least two
-            consecutive automatic updates.
+            Cron runs the script every minute. I reloadeed the page three times
+            and recorded the generation times of consecutive updates:
         </p>
+        <ul>
+            <li>2026-11-15 13:07:01</li>
+            <li>2026-11-15 13:08:01 (one minute later)</li>
+            <li>2026-11-15 13:09:01 (one minute later)</li>
+        </ul>
+        <p>The generation time changed after each update, so the schedule works.</p>
+
 
         <h3>Reboot test</h3>
         <p>
-            TODO: Record when you rebooted the VM and whether the
-            Week 2 application and Week 3 page opened afterwards.
-            Include evidence that the report continued to update.
+            I rebooted the virtual machine at 13:05 (EET) using <code>sudo reboot</code>.
+            After reconnecting I checked that the cron service was enabled and running.
         </p>
+        <ul>
+            <li>The Week 2 application opened normally.</li>
+            <li>The Week 3 page opened normally.</li>
+            <li>The server uptime on the report had restarted from a few minutes.</li>
+            <li>The generation time continued to change after the reboot (13:05:03 and 13:07:01).
+        </ul>
     </section>
 
     <section>
         <h2>A problem solved or a lesson learned</h2>
-        <p>TODO: Describe one example from your own work.</p>
+        <p>
+           During the lectures I understood that I would need to edit the Nginx configuration file for the Week 3 page to work,
+           as I had done for the Week 2 application. Later I realised that this was not necessary for this exercise.
+        </p>
+        <p>
+           The Week 2 application (Python) is running on its own port, so Nginx needs a seperate location block
+           with a proxy pass to forward requests to it. The Week 3 report is only a static HTML file.
+           The existing location block already serves files from <code>/var/www/html/</code>, so a request to
+           <code>/viikko3/</code> returns <code>/var/www/html/viikko3/index.html</code> without any changes.
+        </p>
+        <p>
+           What I learned is that serving a static page only requires the file to be in the right directory with
+           readable permissions, while an application needs a reverse proxy configuration.
+           Not editing the Nginx file also meant that the Week 2 application could not be broken by accident.
+        </p>
     </section>
 
     <footer>
